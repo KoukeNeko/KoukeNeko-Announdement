@@ -23,7 +23,7 @@ public final class KoukeNekoAnnoundement extends JavaPlugin {
 
         // 使用 CommandSystem 註冊 reload 指令
         commandSystem = new CommandSystem(this);
-        commandSystem.registerCommand("koukenekoannouncementreload", new ReloadCommand(this), null, "重新載入設定文件", "/koukenekoannouncementreload", "knar");
+        commandSystem.registerCommand("koukenekoannouncementreload", new ReloadCommand(this), "koukeneko.announcement.admin", "重新載入設定文件", "/koukenekoannouncementreload", "knareload");
 
         // 啟動公告任務
         scheduleAnnouncements();
