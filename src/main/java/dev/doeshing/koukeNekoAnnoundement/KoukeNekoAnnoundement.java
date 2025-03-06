@@ -4,8 +4,11 @@ import dev.doeshing.koukeNekoAnnoundement.commands.ReloadCommand;
 import dev.doeshing.koukeNekoAnnoundement.core.CommandSystem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Collections;
 import java.util.List;
 
 public final class KoukeNekoAnnoundement extends JavaPlugin {
@@ -38,22 +41,27 @@ public final class KoukeNekoAnnoundement extends JavaPlugin {
      * 根據 config.yml 中 Global_Messages 設定來定時廣播公告訊息
      */
     public void scheduleAnnouncements() {
-        // 如果已經有公告任務，先取消它
         if (announcementTaskId != -1) {
             Bukkit.getScheduler().cancelTask(announcementTaskId);
         }
 
         int intervalSeconds = getConfig().getInt("Global_Messages.Interval", 30);
-        long intervalTicks = intervalSeconds * 20L; // 將秒轉換成 Minecraft 的 tick
+        long intervalTicks = intervalSeconds * 20L;
         List<String> messages = getConfig().getStringList("Global_Messages.Messages");
         String prefix = getConfig().getString("Global_Messages.Prefix", "");
         boolean headerAndFooter = getConfig().getBoolean("Global_Messages.Header_And_Footer", true);
         String header = getConfig().getString("Global_Messages.Header", "");
         String footer = getConfig().getString("Global_Messages.Footer", "");
+        boolean randomOrder = getConfig().getBoolean("Global_Messages.Random", false);
+        String soundName = getConfig().getString("Global_Messages.Sound", "");
 
         if (messages.isEmpty()) {
             getLogger().warning("設定文件中未找到任何公告訊息！");
             return;
+        }
+
+        if (randomOrder) {
+            Collections.shuffle(messages);
         }
 
         announcementTaskId = Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
@@ -62,21 +70,32 @@ public final class KoukeNekoAnnoundement extends JavaPlugin {
             @Override
             public void run() {
                 String msg = messages.get(index);
-                // 替換 {Prefix} 佔位符
                 msg = msg.replace("{Prefix}", prefix);
-                // 轉換色彩代碼
                 msg = ChatColor.translateAlternateColorCodes('&', msg);
 
                 if (headerAndFooter) {
-                    String coloredHeader = ChatColor.translateAlternateColorCodes('&', header);
-                    Bukkit.broadcastMessage(coloredHeader);
+                    Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', header));
                 }
                 Bukkit.broadcastMessage(msg);
                 if (headerAndFooter) {
-                    String coloredFooter = ChatColor.translateAlternateColorCodes('&', footer);
-                    Bukkit.broadcastMessage(coloredFooter);
+                    Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', footer));
                 }
+
+                if (!soundName.isEmpty()) {
+                    try {
+                        Sound sound = Sound.valueOf(soundName);
+                        for (Player player : Bukkit.getOnlinePlayers()) {
+                            player.playSound(player.getLocation(), sound, 1.0F, 1.0F);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        getLogger().warning("設定文件中指定的聲音名稱無效：" + soundName);
+                    }
+                }
+
                 index = (index + 1) % messages.size();
+                if (index == 0 && randomOrder) {
+                    Collections.shuffle(messages); // 再次隨機排序
+                }
             }
         }, 0L, intervalTicks).getTaskId();
     }
