@@ -1,14 +1,20 @@
 package dev.doeshing.koukeNekoAnnoundement.core;
 
+import dev.doeshing.koukeNekoAnnoundement.KoukeNekoAnnoundement;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.Plugin;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
 public class CommandSystem {
 
-    private final KoukeNeko plugin;
+    private final KoukeNekoAnnoundement plugin;
 
-    public CommandSystem(KoukeNeko plugin) {
+    public CommandSystem(KoukeNekoAnnoundement plugin) {
         this.plugin = plugin;
     }
 
