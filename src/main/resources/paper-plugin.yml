@@ -1,0 +1,4 @@
+name: KoukeNeko-Announdement
+version: '1.0-SNAPSHOT'
+main: dev.doeshing.koukeNekoAnnoundement.KoukeNekoAnnoundement
+api-version: '1.21'
